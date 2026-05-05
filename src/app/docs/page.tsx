@@ -1,24 +1,23 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Search,
-  ChevronRight,
+  ArrowLeft,
   Cpu,
-  Gamepad,
   Eye,
   Rss,
+  Activity,
   Layers,
-  ArrowLeft,
   Terminal,
   Zap,
   Shield,
-  Activity
+  Smartphone,
+  Navigation,
+  Bot
 } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
-
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
 
@@ -33,98 +32,131 @@ interface DocItem {
 
 const TECHNICAL_SPECS: { category: string; items: DocItem[] }[] = [
   {
-    category: 'Hardware Core',
+    category: 'Chapter 01-02: Preparation & Move',
     items: [
       {
         id: 'controller',
-        title: 'Arduino Uno R3',
-        icon: <Cpu />,
-        content: 'The central processing unit of the robot. Responsible for executing the main loop and handling all sensor data.',
+        title: 'Arduino Uno R3 Shield',
+        icon: <Cpu strokeWidth={1.5} />,
+        content: 'The customized Elegoo shield that sits on top of the Arduino Uno, providing centralized connections for all V4.0 components.',
         details: [
           'Microcontroller: ATmega328P',
           'Operating Voltage: 5V',
-          'Flash Memory: 32 KB',
-          'SRAM: 2 KB',
-          'EEPROM: 1 KB',
-          'Clock Speed: 16 MHz'
+          'Integrated Motor Driver: TB6612',
+          'Power: 2x 18650 Li-ion Batteries'
         ]
       },
       {
         id: 'motor-driver',
-        title: 'TB6612 Motor Driver',
-        icon: <Zap />,
-        content: 'Dual H-Bridge driver used to control the speed and direction of DC motors with high efficiency.',
+        title: 'TB6612 Dual Motor Driver',
+        icon: <Zap strokeWidth={1.5} />,
+        content: 'Replaces the older L298N module. Highly efficient H-Bridge driver for controlling all four DC motors in 4WD configuration.',
         pins: {
-          'PWMA': 'Pin 5',
-          'PWMB': 'Pin 6',
-          'AIN1': 'Pin 7',
-          'BIN1': 'Pin 8',
+          'PWMA (Left Speed)': 'Pin 5',
+          'PWMB (Right Speed)': 'Pin 6',
+          'AIN1 (Left Dir)': 'Pin 7',
+          'BIN1 (Right Dir)': 'Pin 8',
           'STBY': 'Pin 3 (Standby)'
         }
       },
     ]
   },
   {
-    category: 'Sensing & Input',
+    category: 'Chapter 03 & 06: Line Tracking & Following',
     items: [
       {
-        id: 'ultrasonic',
-        title: 'HC-SR04 Ultrasonic',
-        icon: <Eye />,
-        content: 'Measures distances from 2cm to 400cm by emitting ultrasonic waves and measuring the echo time.',
+        id: 'line-tracking',
+        title: 'ITR20001 3-Channel IR Array',
+        icon: <Rss strokeWidth={1.5} />,
+        content: 'Located underneath the chassis. Uses three infrared sensors to detect black lines on white surfaces for autonomous navigation.',
         pins: {
-          'TRIG': 'Pin 13',
-          'ECHO': 'Pin 12'
+          'Left Sensor (L)': 'Pin A2',
+          'Middle Sensor (M)': 'Pin A1',
+          'Right Sensor (R)': 'Pin A0'
         }
       },
       {
-        id: 'line-tracking',
-        title: 'ITR20001 IR Array',
-        icon: <Rss />,
-        content: 'A 3-channel infrared sensor array for following lines based on surface reflectivity.',
+        id: 'follow',
+        title: 'Follow Mode Logic',
+        icon: <Navigation strokeWidth={1.5} />,
+        content: 'Combines ultrasonic distance sensing and IR reflectivity to follow a moving object (like a hand or a box) at a fixed distance.',
+      },
+    ]
+  },
+  {
+    category: 'Chapter 04-05: Servo & Obstacle Avoidance',
+    items: [
+      {
+        id: 'ultrasonic',
+        title: 'HC-SR04 Ultrasonic Sensor',
+        icon: <Eye strokeWidth={1.5} />,
+        content: 'The "eyes" of the robot. Sends a 40kHz acoustic pulse to measure distance to obstacles up to 400cm.',
         pins: {
-          'Left (L)': 'Pin A2',
-          'Middle (M)': 'Pin A1',
-          'Right (R)': 'Pin A0'
+          'TRIG (Output pulse)': 'Pin 13',
+          'ECHO (Input pulse)': 'Pin 12'
+        }
+      },
+      {
+        id: 'servo',
+        title: 'SG90 Pan-Tilt Servo',
+        icon: <Activity strokeWidth={1.5} />,
+        content: 'Mounted on the front chassis to sweep the ultrasonic sensor horizontally and vertically for a 3D obstacle map.',
+        pins: {
+          'Servo Z (Horizontal / Pan)': 'Pin 10',
+          'Servo Y (Vertical / Tilt)': 'Pin 11'
         }
       },
     ]
   },
   {
-    category: 'Actuators & Extras',
+    category: 'Chapter 07-08: Extras & Bluetooth App',
     items: [
       {
-        id: 'servo',
-        title: 'SG90 Servo',
-        icon: <Activity />,
-        content: 'Used to rotate the ultrasonic sensor for obstacle scanning and detection.',
+        id: 'bluetooth',
+        title: 'Bluetooth 4.0 BLE Module',
+        icon: <Smartphone strokeWidth={1.5} />,
+        content: 'Enables wireless remote control and DIY programming via the official Elegoo BLE App on iOS and Android.',
         pins: {
-          'Servo Z (Horizontal)': 'Pin 10',
-          'Servo Y (Vertical)': 'Pin 11'
+          'RX': 'TX on Arduino',
+          'TX': 'RX on Arduino'
         }
       },
       {
         id: 'others',
-        title: 'Peripherals',
-        icon: <Layers />,
-        content: 'Additional modules for interaction and status monitoring.',
+        title: 'RGB & IR Peripherals',
+        icon: <Layers strokeWidth={1.5} />,
+        content: 'Additional modules for status indicators (WS2812B RGB) and remote control via IR.',
         pins: {
-          'RGB LED (WS2812B)': 'Pin 4',
+          'RGB LED Strip': 'Pin 4',
           'IR Receiver': 'Pin 9',
-          'Onboard Key': 'Pin 2',
-          'Voltage Detection': 'Pin A3'
+          'Voltage Sensor': 'Pin A3'
         }
       },
     ]
   }
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.98 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+};
+
 export default function DocsPage() {
   const [search, setSearch] = useState('');
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
-  React.useEffect(() => {
+  useEffect(() => {
     const checkUser = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
@@ -141,100 +173,109 @@ export default function DocsPage() {
     ...cat,
     items: cat.items.filter(item =>
       item.title.toLowerCase().includes(search.toLowerCase()) ||
-      item.content.toLowerCase().includes(search.toLowerCase())
+      item.content.toLowerCase().includes(search.toLowerCase()) ||
+      cat.category.toLowerCase().includes(search.toLowerCase())
     )
   })).filter(cat => cat.items.length > 0);
 
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-zinc-100 font-sans pb-20">
-      {/* Header */}
-      <header className="border-b border-white/5 bg-[#0D0D0D]/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+    <div className="min-h-screen bg-[#000000] text-[#F5F5F7] font-sans pb-32">
+      {/* Apple-like Header */}
+      <header className="border-b border-white/10 bg-[#1D1D1F]/80 backdrop-blur-2xl sticky top-0 z-50 transition-all">
+        <div className="container mx-auto px-4 h-14 flex items-center justify-between max-w-5xl">
           <div className="flex items-center gap-4">
-            <Link href="/" className="p-2 hover:bg-white/5 rounded-lg transition-colors">
-              <ArrowLeft size={20} className="text-zinc-400" />
-            </Link>
-            <Link href="/">
-              <div className="flex items-center gap-3 bg-white px-3 py-2 rounded-xl border border-white/10 shadow-sm ml-2 hover:scale-[1.02] transition-transform active:scale-100 cursor-pointer">
-                <div className="relative w-6 h-6 overflow-hidden shrink-0">
-                  <img src="/bot/logo.png" alt="Logo" className="object-contain w-full h-full brightness-0" />
-                </div>
-                <span className="font-black text-[10px] tracking-[0.1em] text-black whitespace-nowrap">BOTCASSO TOOLBOX</span>
-              </div>
+            <Link href="/" className="group flex items-center gap-2 text-sm font-medium text-[#86868B] hover:text-[#F5F5F7] transition-colors">
+              <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+              <span>Back</span>
             </Link>
           </div>
-          <div className="relative max-w-md w-full hidden md:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
+          <div className="relative max-w-sm w-full hidden sm:block">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#86868B]" size={14} />
             <input
               type="text"
-              placeholder="Search pins, modules, specs..."
+              placeholder="Search components or pins..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500/50 transition-all"
+              className="w-full bg-[#2C2C2E]/50 border border-white/5 rounded-full py-1.5 pl-9 pr-4 text-xs focus:outline-none focus:bg-[#2C2C2E] focus:border-[#0071E3]/50 transition-all text-[#F5F5F7] placeholder:text-[#86868B]"
             />
           </div>
           <Link href="/chat">
-            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)]">
-              Start Chat
+            <button className="flex items-center gap-2 px-4 py-1.5 bg-[#F5F5F7] hover:bg-white text-black text-xs font-semibold rounded-full transition-all shadow-sm">
+              <Bot size={14} />
+              <span>Ask AI</span>
             </button>
           </Link>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 pt-12 max-w-5xl">
+      <main className="container mx-auto px-4 pt-24 max-w-4xl">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-16"
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-24 text-center flex flex-col items-center"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/20 bg-blue-500/5 mb-6">
-            <Shield size={14} className="text-blue-400" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-blue-400">Official Specification V4.0</span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">Elegoo Smart Robot Car Kit V4.0</h1>
-          <p className="text-zinc-400 text-lg max-w-2xl leading-relaxed">
-            Technical breakdown of the hardware components, pin mappings, and functional logic extracted from the official documentation.
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-[#1D1D1F] backdrop-blur-md mb-8"
+          >
+            <Shield size={12} className="text-[#0071E3]" />
+            <span className="text-[10px] font-semibold tracking-[0.15em] text-[#0071E3] uppercase">Official Manual V4.0</span>
+          </motion.div>
+          <h1 className="text-5xl md:text-7xl font-semibold tracking-[-0.04em] mb-6 leading-tight">
+            Engineering <br className="hidden md:block" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-300 to-zinc-600">Documentation.</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-[#86868B] max-w-2xl leading-relaxed font-light tracking-tight">
+            Complete technical breakdown, pin mappings, and module logic extracted directly from the Elegoo Smart Robot Car V4.0 tutorials.
           </p>
         </motion.div>
 
-        <div className="grid gap-16">
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+          className="grid gap-20"
+        >
           {filteredSpecs.map((category, idx) => (
-            <motion.section
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-            >
-              <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] mb-10 border-l-2 border-blue-600 pl-4">{category.category}</h2>
+            <motion.section key={idx} variants={itemVariants}>
+              <h2 className="text-sm font-semibold text-[#F5F5F7] uppercase tracking-[0.2em] mb-8 pb-4 border-b border-white/10">
+                {category.category}
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {category.items.map((item) => (
                   <div
                     key={item.id}
-                    className="glass-dark border border-white/5 p-8 rounded-3xl hover:border-white/20 transition-all group relative overflow-hidden"
+                    className="p-8 rounded-[32px] bg-[#1D1D1F] border border-white/5 hover:bg-[#2C2C2E] transition-all duration-500 group relative overflow-hidden flex flex-col"
                   >
-                    <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity text-[120px]">
-                      {item.icon}
-                    </div>
-
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-12 h-12 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                    <div className="absolute -top-10 -right-10 text-white/[0.02] group-hover:text-white/[0.04] transition-colors duration-500">
+                      <div className="transform scale-[4] rotate-12">
                         {item.icon}
                       </div>
-                      <h3 className="text-xl font-bold">{item.title}</h3>
                     </div>
 
-                    <p className="text-zinc-400 text-sm leading-relaxed mb-6">{item.content}</p>
+                    <div className="flex items-center gap-4 mb-8 relative z-10">
+                      <div className="w-12 h-12 rounded-full bg-[#2C2C2E] flex items-center justify-center text-[#F5F5F7] group-hover:scale-110 group-hover:bg-[#0071E3] transition-all duration-500 shadow-sm">
+                        {item.icon}
+                      </div>
+                      <h3 className="text-xl font-medium tracking-tight text-[#F5F5F7]">{item.title}</h3>
+                    </div>
+
+                    <p className="text-[#86868B] text-sm leading-relaxed mb-8 flex-1 relative z-10 font-light">
+                      {item.content}
+                    </p>
 
                     {item.details && (
-                      <div className="space-y-2">
-                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Specifications</p>
-                        <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-3 mb-6 relative z-10">
+                        <p className="text-[10px] font-semibold text-[#86868B] uppercase tracking-widest">Specifications</p>
+                        <div className="flex flex-col gap-2">
                           {item.details.map((detail, i) => (
-                            <div key={i} className="text-xs text-zinc-300 flex items-center gap-2">
-                              <div className="w-1 h-1 rounded-full bg-blue-500" />
+                            <div key={i} className="text-xs text-[#F5F5F7] flex items-center gap-3">
+                              <div className="w-1 h-1 rounded-full bg-[#0071E3]" />
                               {detail}
                             </div>
                           ))}
@@ -243,13 +284,13 @@ export default function DocsPage() {
                     )}
 
                     {item.pins && (
-                      <div className="space-y-3">
-                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Pin Mapping</p>
-                        <div className="grid grid-cols-1 gap-2">
+                      <div className="space-y-3 relative z-10 mt-auto pt-6 border-t border-white/5">
+                        <p className="text-[10px] font-semibold text-[#86868B] uppercase tracking-widest">Pin Mapping</p>
+                        <div className="grid grid-cols-1 gap-1">
                           {Object.entries(item.pins).map(([key, val], i) => (
-                            <div key={i} className="flex justify-between items-center py-2 border-b border-white/5">
-                              <span className="text-xs font-mono text-zinc-400">{key}</span>
-                              <span className="text-xs font-bold text-blue-400">{val}</span>
+                            <div key={i} className="flex justify-between items-center py-1.5">
+                              <span className="text-xs text-[#86868B] font-light">{key}</span>
+                              <span className="text-xs font-mono font-medium text-[#F5F5F7] bg-white/5 px-2 py-0.5 rounded">{val}</span>
                             </div>
                           ))}
                         </div>
@@ -260,43 +301,48 @@ export default function DocsPage() {
               </div>
             </motion.section>
           ))}
-        </div>
+        </motion.div>
 
-        {/* Quick Reference Table */}
+        {/* Quick Reference Table Apple-style */}
         <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-20 pt-20 border-t border-white/5"
+          variants={itemVariants}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-100px" }}
+          className="mt-32 pt-20 border-t border-white/10"
         >
-          <div className="flex items-center gap-3 mb-8">
-            <Terminal size={24} className="text-blue-500" />
-            <h2 className="text-2xl font-bold">Programming Quick Start</h2>
+          <div className="flex flex-col items-center mb-12 text-center">
+            <div className="w-12 h-12 rounded-full bg-[#2C2C2E] flex items-center justify-center text-[#F5F5F7] mb-6">
+              <Terminal strokeWidth={1.5} size={20} />
+            </div>
+            <h2 className="text-3xl font-semibold tracking-tight">Programming Quick Start</h2>
+            <p className="text-[#86868B] mt-3 font-light">Essential code logic snippets at a glance.</p>
           </div>
-          <div className="glass overflow-hidden rounded-3xl border border-white/10">
+          
+          <div className="overflow-hidden rounded-[32px] bg-[#1D1D1F] border border-white/5">
             <table className="w-full text-left text-sm">
-              <thead className="bg-white/5 border-b border-white/10">
+              <thead className="bg-[#2C2C2E]/50 border-b border-white/5">
                 <tr>
-                  <th className="px-6 py-4 font-bold text-zinc-400 uppercase tracking-widest text-[10px]">Function</th>
-                  <th className="px-6 py-4 font-bold text-zinc-400 uppercase tracking-widest text-[10px]">Pins / Details</th>
+                  <th className="px-8 py-5 font-semibold text-[#86868B] uppercase tracking-widest text-[10px]">Functionality</th>
+                  <th className="px-8 py-5 font-semibold text-[#86868B] uppercase tracking-widest text-[10px]">Implementation Detail</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
-                <tr>
-                  <td className="px-6 py-4 font-medium">Forward Movement</td>
-                  <td className="px-6 py-4 font-mono text-zinc-400 text-xs">AIN1:HIGH, BIN1:HIGH, PWMA:Speed, PWMB:Speed</td>
+              <tbody className="divide-y divide-white/5 font-light">
+                <tr className="hover:bg-[#2C2C2E]/30 transition-colors">
+                  <td className="px-8 py-5 text-[#F5F5F7]">Forward Movement</td>
+                  <td className="px-8 py-5 font-mono text-[#86868B] text-xs">AIN1:HIGH, BIN1:HIGH, PWMA:Speed, PWMB:Speed</td>
                 </tr>
-                <tr>
-                  <td className="px-6 py-4 font-medium">Obstacle Detection</td>
-                  <td className="px-6 py-4 font-mono text-zinc-400 text-xs">TRIG:13, ECHO:12 | Servo:10 (180°)</td>
+                <tr className="hover:bg-[#2C2C2E]/30 transition-colors">
+                  <td className="px-8 py-5 text-[#F5F5F7]">Obstacle Detection</td>
+                  <td className="px-8 py-5 font-mono text-[#86868B] text-xs">PULSEIN(ECHO, HIGH) * 0.0173</td>
                 </tr>
-                <tr>
-                  <td className="px-6 py-4 font-medium">Line Tracking</td>
-                  <td className="px-6 py-4 font-mono text-zinc-400 text-xs">L:A2, M:A1, R:A0 (Analog Reads)</td>
+                <tr className="hover:bg-[#2C2C2E]/30 transition-colors">
+                  <td className="px-8 py-5 text-[#F5F5F7]">Line Tracking (Black)</td>
+                  <td className="px-8 py-5 font-mono text-[#86868B] text-xs">analogRead(PIN) {">"} THRESHOLD</td>
                 </tr>
-                <tr>
-                  <td className="px-6 py-4 font-medium">RGB Status</td>
-                  <td className="px-6 py-4 font-mono text-zinc-400 text-xs">Pin 4 (NeoPixel/FastLED)</td>
+                <tr className="hover:bg-[#2C2C2E]/30 transition-colors">
+                  <td className="px-8 py-5 text-[#F5F5F7]">Bluetooth Data Rx</td>
+                  <td className="px-8 py-5 font-mono text-[#86868B] text-xs">Serial.read() == 'f' (Forward)</td>
                 </tr>
               </tbody>
             </table>

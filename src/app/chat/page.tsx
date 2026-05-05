@@ -18,7 +18,8 @@ import {
   Activity,
   Menu,
   X,
-  LogOut
+  LogOut,
+  Bot
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { CodeBlock } from '@/components/ui/CodeBlock';
@@ -178,7 +179,7 @@ export default function ChatPage() {
 
           <div className="flex-1 overflow-y-auto space-y-2 pr-2 scrollbar-hide">
             <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest px-2 mb-2">History</p>
-            {userSessions.map((session) => (
+            {userSessions.filter(s => s.messages.length > 0 || s.id === currentSessionId).map((session) => (
               <div
                 key={session.id}
                 onClick={() => setCurrentSession(session.id)}
@@ -265,18 +266,21 @@ export default function ChatPage() {
             currentSession?.messages.map((msg, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <div className={`max-w-[85%] md:max-w-[75%] rounded-3xl p-6 ${msg.role === 'user'
-                    ? 'bg-blue-600 text-white shadow-[0_4px_20px_rgba(37,99,235,0.2)]'
-                    : 'glass-dark border border-white/5'
+                <div className={`max-w-[85%] md:max-w-[75%] rounded-[24px] px-6 py-4 ${msg.role === 'user'
+                    ? 'bg-blue-600 text-white font-medium shadow-sm'
+                    : 'bg-[#1C1C1E]/80 backdrop-blur-xl border border-white/5 text-zinc-200 shadow-sm'
                   }`}>
-                  <div className="flex items-center gap-2 mb-3 opacity-50 text-[10px] font-bold uppercase tracking-wider">
-                    {msg.role === 'user' ? 'Engineering Input' : 'AI Assistant Output'}
-                  </div>
-                  <div className={`prose prose-invert max-w-none text-sm md:text-base leading-relaxed ${msg.role === 'user' ? 'prose-p:text-white' : 'text-zinc-200'
+                  {msg.role === 'assistant' && (
+                    <div className="flex items-center gap-2 mb-2 opacity-50 text-[10px] font-bold uppercase tracking-wider">
+                      <Bot size={12} /> Assistant
+                    </div>
+                  )}
+                  <div className={`prose prose-invert max-w-none text-sm md:text-[15px] leading-relaxed ${msg.role === 'user' ? 'prose-p:text-white' : 'text-zinc-200'
                     }`}>
                     <ReactMarkdown
                       components={{

@@ -1,4 +1,5 @@
 import Hero from '@/components/landing/Hero';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -15,8 +16,8 @@ export default function Home() {
             <span className="font-black text-[10px] tracking-[0.1em] text-black whitespace-nowrap uppercase">Botcasso Toolbox</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-zinc-500">
-            <span className="hover:text-white cursor-pointer transition-colors">Privacy</span>
-            <span className="hover:text-white cursor-pointer transition-colors">Terms</span>
+            <Link href="/privacy" className="hover:text-white cursor-pointer transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-white cursor-pointer transition-colors">Terms</Link>
             <a href="https://github.com/minijbs07/bot" target="_blank" rel="noopener noreferrer" className="hover:text-white cursor-pointer transition-colors">Github</a>
           </div>
           <p className="text-zinc-600 text-xs mt-8 md:mt-0 font-medium tracking-wide uppercase">
