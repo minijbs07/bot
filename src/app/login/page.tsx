@@ -35,7 +35,9 @@ export default function LoginPage() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}${process.env.NEXT_PUBLIC_BASE_PATH || '/bot'}/chat`,
+          emailRedirectTo: window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/bot/chat/' 
+            : 'https://javib.es/bot/chat/',
         }
       });
       if (error) {
