@@ -2,13 +2,13 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Search, 
-  ChevronRight, 
-  Cpu, 
-  Gamepad, 
-  Eye, 
-  Rss, 
+import {
+  Search,
+  ChevronRight,
+  Cpu,
+  Gamepad,
+  Eye,
+  Rss,
   Layers,
   ArrowLeft,
   Terminal,
@@ -35,10 +35,10 @@ const TECHNICAL_SPECS: { category: string; items: DocItem[] }[] = [
   {
     category: 'Hardware Core',
     items: [
-      { 
-        id: 'controller', 
-        title: 'Arduino Uno R3', 
-        icon: <Cpu />, 
+      {
+        id: 'controller',
+        title: 'Arduino Uno R3',
+        icon: <Cpu />,
         content: 'The central processing unit of the robot. Responsible for executing the main loop and handling all sensor data.',
         details: [
           'Microcontroller: ATmega328P',
@@ -49,10 +49,10 @@ const TECHNICAL_SPECS: { category: string; items: DocItem[] }[] = [
           'Clock Speed: 16 MHz'
         ]
       },
-      { 
-        id: 'motor-driver', 
-        title: 'TB6612 Motor Driver', 
-        icon: <Zap />, 
+      {
+        id: 'motor-driver',
+        title: 'TB6612 Motor Driver',
+        icon: <Zap />,
         content: 'Dual H-Bridge driver used to control the speed and direction of DC motors with high efficiency.',
         pins: {
           'PWMA': 'Pin 5',
@@ -67,20 +67,20 @@ const TECHNICAL_SPECS: { category: string; items: DocItem[] }[] = [
   {
     category: 'Sensing & Input',
     items: [
-      { 
-        id: 'ultrasonic', 
-        title: 'HC-SR04 Ultrasonic', 
-        icon: <Eye />, 
+      {
+        id: 'ultrasonic',
+        title: 'HC-SR04 Ultrasonic',
+        icon: <Eye />,
         content: 'Measures distances from 2cm to 400cm by emitting ultrasonic waves and measuring the echo time.',
         pins: {
           'TRIG': 'Pin 13',
           'ECHO': 'Pin 12'
         }
       },
-      { 
-        id: 'line-tracking', 
-        title: 'ITR20001 IR Array', 
-        icon: <Rss />, 
+      {
+        id: 'line-tracking',
+        title: 'ITR20001 IR Array',
+        icon: <Rss />,
         content: 'A 3-channel infrared sensor array for following lines based on surface reflectivity.',
         pins: {
           'Left (L)': 'Pin A2',
@@ -93,20 +93,20 @@ const TECHNICAL_SPECS: { category: string; items: DocItem[] }[] = [
   {
     category: 'Actuators & Extras',
     items: [
-      { 
-        id: 'servo', 
-        title: 'SG90 Servo', 
-        icon: <Activity />, 
+      {
+        id: 'servo',
+        title: 'SG90 Servo',
+        icon: <Activity />,
         content: 'Used to rotate the ultrasonic sensor for obstacle scanning and detection.',
         pins: {
           'Servo Z (Horizontal)': 'Pin 10',
           'Servo Y (Vertical)': 'Pin 11'
         }
       },
-      { 
-        id: 'others', 
-        title: 'Peripherals', 
-        icon: <Layers />, 
+      {
+        id: 'others',
+        title: 'Peripherals',
+        icon: <Layers />,
         content: 'Additional modules for interaction and status monitoring.',
         pins: {
           'RGB LED (WS2812B)': 'Pin 4',
@@ -139,8 +139,8 @@ export default function DocsPage() {
 
   const filteredSpecs = TECHNICAL_SPECS.map(cat => ({
     ...cat,
-    items: cat.items.filter(item => 
-      item.title.toLowerCase().includes(search.toLowerCase()) || 
+    items: cat.items.filter(item =>
+      item.title.toLowerCase().includes(search.toLowerCase()) ||
       item.content.toLowerCase().includes(search.toLowerCase())
     )
   })).filter(cat => cat.items.length > 0);
@@ -167,8 +167,8 @@ export default function DocsPage() {
           </div>
           <div className="relative max-w-md w-full hidden md:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Search pins, modules, specs..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -201,7 +201,7 @@ export default function DocsPage() {
 
         <div className="grid gap-16">
           {filteredSpecs.map((category, idx) => (
-            <motion.section 
+            <motion.section
               key={idx}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -211,23 +211,23 @@ export default function DocsPage() {
               <h2 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] mb-10 border-l-2 border-blue-600 pl-4">{category.category}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {category.items.map((item) => (
-                  <div 
+                  <div
                     key={item.id}
                     className="glass-dark border border-white/5 p-8 rounded-3xl hover:border-white/20 transition-all group relative overflow-hidden"
                   >
                     <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity text-[120px]">
                       {item.icon}
                     </div>
-                    
+
                     <div className="flex items-center gap-4 mb-6">
                       <div className="w-12 h-12 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
                         {item.icon}
                       </div>
                       <h3 className="text-xl font-bold">{item.title}</h3>
                     </div>
-                    
+
                     <p className="text-zinc-400 text-sm leading-relaxed mb-6">{item.content}</p>
-                    
+
                     {item.details && (
                       <div className="space-y-2">
                         <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Specifications</p>
@@ -263,7 +263,7 @@ export default function DocsPage() {
         </div>
 
         {/* Quick Reference Table */}
-        <motion.section 
+        <motion.section
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}

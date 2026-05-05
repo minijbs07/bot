@@ -5,16 +5,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useChatStore, Message } from '@/store/useChatStore';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  Send, 
-  Plus, 
-  MessageSquare, 
-  Trash2, 
-  Search, 
-  Terminal, 
-  Cpu, 
-  Navigation, 
-  Radio, 
+import {
+  Send,
+  Plus,
+  MessageSquare,
+  Trash2,
+  Search,
+  Terminal,
+  Cpu,
+  Navigation,
+  Radio,
   Activity,
   Menu,
   X,
@@ -31,16 +31,16 @@ const TEMPLATES = [
 ];
 
 export default function ChatPage() {
-  const { 
-    sessions, 
-    currentSessionId, 
-    createNewSession, 
-    setCurrentSession, 
-    addMessage, 
+  const {
+    sessions,
+    currentSessionId,
+    createNewSession,
+    setCurrentSession,
+    addMessage,
     deleteSession,
     updateSessionTitle
   } = useChatStore();
-  
+
   const [input, setInput] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -99,30 +99,30 @@ export default function ChatPage() {
     try {
       const supabase = (await import('@/lib/supabase')).createClient();
       const { data, error } = await supabase.functions.invoke('chat-proxy', {
-        body: { 
-          messages: currentSession?.messages.concat(userMsg).map(m => ({ role: m.role, content: m.content })) 
+        body: {
+          messages: currentSession?.messages.concat(userMsg).map(m => ({ role: m.role, content: m.content }))
         },
       });
 
       if (error) throw error;
-      
+
       // Since Edge Functions handle streaming differently in invoke, 
       // we'll either need to handle a non-streaming response or 
       // use a direct fetch to the edge function URL if streaming is required.
       // For simplicity in static export, we'll use the invoke data.
-      
+
       const assistantContent = data.choices[0]?.message?.content || '';
       const assistantMsg: Message = {
         role: 'assistant',
         content: assistantContent,
         timestamp: Date.now()
       };
-      
+
       addMessage(currentSessionId, assistantMsg);
 
     } catch (error) {
       console.error(error);
-      
+
       // Update session title if it's the first message (even on error, we might have the user message)
       if (currentSession?.messages.length === 0) {
         updateSessionTitle(currentSessionId, text.slice(0, 30) + (text.length > 30 ? '...' : ''));
@@ -143,7 +143,7 @@ export default function ChatPage() {
   return (
     <div className="flex h-screen bg-[#0A0A0A] text-zinc-100 overflow-hidden font-sans">
       {/* Mobile Menu Button */}
-      <button 
+      <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         className="fixed top-4 left-4 z-50 md:hidden p-2 glass rounded-lg"
       >
@@ -182,15 +182,14 @@ export default function ChatPage() {
               <div
                 key={session.id}
                 onClick={() => setCurrentSession(session.id)}
-                className={`flex items-center justify-between group px-3 py-2.5 rounded-lg cursor-pointer transition-all ${
-                  currentSessionId === session.id ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20' : 'hover:bg-white/5 text-zinc-400 border border-transparent'
-                }`}
+                className={`flex items-center justify-between group px-3 py-2.5 rounded-lg cursor-pointer transition-all ${currentSessionId === session.id ? 'bg-blue-600/10 text-blue-400 border border-blue-600/20' : 'hover:bg-white/5 text-zinc-400 border border-transparent'
+                  }`}
               >
                 <div className="flex items-center gap-3 overflow-hidden">
                   <MessageSquare size={16} className={currentSessionId === session.id ? 'text-blue-400' : 'text-zinc-500'} />
                   <span className="truncate text-sm font-medium">{session.title}</span>
                 </div>
-                <button 
+                <button
                   onClick={(e) => { e.stopPropagation(); deleteSession(session.id); }}
                   className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 transition-opacity"
                 >
@@ -231,7 +230,7 @@ export default function ChatPage() {
 
       {/* Main Chat Area */}
       <main className="flex-1 flex flex-col relative min-w-0">
-        <div 
+        <div
           ref={scrollRef}
           className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 scroll-smooth"
         >
@@ -270,17 +269,15 @@ export default function ChatPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <div className={`max-w-[85%] md:max-w-[75%] rounded-3xl p-6 ${
-                  msg.role === 'user' 
-                    ? 'bg-blue-600 text-white shadow-[0_4px_20px_rgba(37,99,235,0.2)]' 
+                <div className={`max-w-[85%] md:max-w-[75%] rounded-3xl p-6 ${msg.role === 'user'
+                    ? 'bg-blue-600 text-white shadow-[0_4px_20px_rgba(37,99,235,0.2)]'
                     : 'glass-dark border border-white/5'
-                }`}>
+                  }`}>
                   <div className="flex items-center gap-2 mb-3 opacity-50 text-[10px] font-bold uppercase tracking-wider">
                     {msg.role === 'user' ? 'Engineering Input' : 'AI Assistant Output'}
                   </div>
-                  <div className={`prose prose-invert max-w-none text-sm md:text-base leading-relaxed ${
-                    msg.role === 'user' ? 'prose-p:text-white' : 'text-zinc-200'
-                  }`}>
+                  <div className={`prose prose-invert max-w-none text-sm md:text-base leading-relaxed ${msg.role === 'user' ? 'prose-p:text-white' : 'text-zinc-200'
+                    }`}>
                     <ReactMarkdown
                       components={{
                         code({ node, inline, className, children, ...props }: any) {

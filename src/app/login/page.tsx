@@ -80,7 +80,7 @@ export default function LoginPage() {
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
               <div className="flex flex-col items-center mb-8">
-                <motion.div 
+                <motion.div
                   initial={{ scale: 0.8 }}
                   animate={{ scale: 1 }}
                   className="w-16 h-16 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-400 mb-6 shadow-[0_0_20px_rgba(37,99,235,0.2)]"
@@ -91,8 +91,8 @@ export default function LoginPage() {
                   {isSignUp ? 'Crear Cuenta' : 'Acceso Seguro'}
                 </h1>
                 <p className="text-zinc-500 text-center text-sm">
-                  {isSignUp 
-                    ? 'Regístrate con tu correo de la UC para empezar.' 
+                  {isSignUp
+                    ? 'Regístrate con tu correo de la UC para empezar.'
                     : 'Identifícate para acceder al Botcasso Toolbox.'}
                 </p>
               </div>
@@ -138,7 +138,7 @@ export default function LoginPage() {
                     {error}
                   </motion.div>
                 )}
-                
+
                 {message && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
@@ -178,7 +178,7 @@ export default function LoginPage() {
               {isSignUp ? '¿Ya tienes cuenta? Entra aquí' : '¿No tienes cuenta? Crea una'}
               <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
             </button>
-            
+
             <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em]">
               <Terminal size={14} />
               BOTCASSO TOOLBOX

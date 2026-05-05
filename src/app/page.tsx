@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#0A0A0A]">
       <Hero />
-      
+
       {/* Footer */}
       <footer className="border-t border-white/5 py-12 bg-[#0A0A0A]">
         <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-8">
@@ -14,14 +14,14 @@ export default function Home() {
             </div>
             <span className="font-black text-[10px] tracking-[0.1em] text-black whitespace-nowrap uppercase">Botcasso Toolbox</span>
           </div>
-          <div className="flex gap-8 text-sm text-zinc-500 font-medium">
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
-            <a href="#" className="hover:text-white transition-colors">Github</a>
+          <div className="flex items-center gap-6 text-sm text-zinc-500">
+            <span className="hover:text-white cursor-pointer transition-colors">Privacy</span>
+            <span className="hover:text-white cursor-pointer transition-colors">Terms</span>
+            <a href="https://github.com/minijbs07/bot" target="_blank" rel="noopener noreferrer" className="hover:text-white cursor-pointer transition-colors">Github</a>
           </div>
-          <div className="text-sm text-zinc-600">
-            © 2024 ELEGOO Smart Robot Assistant.
-          </div>
+          <p className="text-zinc-600 text-xs mt-8 md:mt-0 font-medium tracking-wide uppercase">
+            © 2025 Botcasso Toolbox • Engineering Excellence
+          </p>
         </div>
       </footer>
     </main>
