@@ -31,11 +31,12 @@ export default function Hero() {
           </motion.div>
 
           <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-8">
-            Elegoo <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">AI Assistant</span>
+            Botcasso <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">Toolbox</span>
           </h1>
 
           <p className="text-xl text-zinc-400 max-w-2xl mx-auto mb-12 leading-relaxed">
-            Programa, depura y construye proyectos para tu Smart Robot Car V4.0 usando IA especializada. Precisión de ingeniería con el poder de la IA.
+            The ultimate AI assistant for the Elegoo Smart Robot Car V4.0. <br />
+            Precisión de ingeniería, código optimizado y documentación interactiva en una sola plataforma.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
