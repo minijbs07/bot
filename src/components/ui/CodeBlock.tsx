@@ -19,11 +19,18 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ language, value }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const downloadIno = () => {
+  const downloadFile = () => {
+    let extension = 'txt';
+    if (language === 'cpp' || language === 'arduino') extension = 'ino';
+    else if (language === 'swift') extension = 'swift';
+    else if (language === 'javascript' || language === 'js') extension = 'js';
+    else if (language === 'python') extension = 'py';
+    else if (language === 'json') extension = 'json';
+
     const element = document.createElement('a');
     const file = new Blob([value], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
-    element.download = 'robot_code.ino';
+    element.download = `botcasso_snippet.${extension}`;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
@@ -42,9 +49,9 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ language, value }) => {
             {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
           </button>
           <button
-            onClick={downloadIno}
+            onClick={downloadFile}
             className="p-1.5 hover:bg-white/10 rounded-md transition-colors text-zinc-400 hover:text-white"
-            title="Download .ino"
+            title="Download Snippet"
           >
             <Download size={16} />
           </button>

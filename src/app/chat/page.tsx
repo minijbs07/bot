@@ -19,7 +19,8 @@ import {
   Menu,
   X,
   LogOut,
-  Bot
+  Bot,
+  Paperclip
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { CodeBlock } from '@/components/ui/CodeBlock';
@@ -48,6 +49,7 @@ export default function ChatPage() {
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -131,6 +133,21 @@ export default function ChatPage() {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result;
+      if (typeof content === 'string') {
+        setInput((prev) => prev + `\n\n\`\`\`${file.name.split('.').pop() || ''}\n${content}\n\`\`\`\n`);
+      }
+    };
+    reader.readAsText(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   if (!mounted || !user) return (
@@ -330,6 +347,20 @@ export default function ChatPage() {
           <div className="max-w-4xl mx-auto relative group">
             <div className="absolute inset-0 bg-blue-600/10 blur-2xl rounded-3xl group-focus-within:bg-blue-600/20 transition-all opacity-0 group-focus-within:opacity-100" />
             <div className="relative glass rounded-2xl border border-white/10 flex items-end p-2 transition-all focus-within:border-blue-500/50">
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileUpload} 
+                className="hidden" 
+                accept=".txt,.ino,.cpp,.c,.h,.swift,.js,.ts,.py,.json,.md"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="p-3 text-zinc-400 hover:text-white hover:bg-white/10 rounded-xl transition-all m-1 flex-shrink-0"
+                title="Attach code file"
+              >
+                <Paperclip size={20} />
+              </button>
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -339,7 +370,7 @@ export default function ChatPage() {
                     handleSend();
                   }
                 }}
-                placeholder="Ask anything about your Elegoo Robot..."
+                placeholder="Ask anything or attach code..."
                 className="flex-1 bg-transparent border-none focus:ring-0 text-white placeholder-zinc-500 p-3 resize-none min-h-[56px] max-h-[200px]"
                 rows={1}
               />

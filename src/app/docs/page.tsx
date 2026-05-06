@@ -133,6 +133,36 @@ const TECHNICAL_SPECS: { category: string; items: DocItem[] }[] = [
         }
       },
     ]
+  },
+  {
+    category: 'Hardware Setup: Dimensions & Assembly',
+    items: [
+      {
+        id: 'dimensions',
+        title: 'Physical Architecture',
+        icon: <Layers strokeWidth={1.5} />,
+        content: 'The Elegoo Smart Robot Car V4.0 is built on a dual-layer acrylic chassis designed for maximum stability and component isolation.',
+        details: [
+          'Total Weight: ~1.2 kg (fully assembled)',
+          'Dimensions: 25.5cm (L) x 16cm (W) x 16cm (H)',
+          'Chassis Material: High-impact acrylic (remove protective film before assembly)',
+          'Motor Configuration: 4WD (Four-Wheel Drive) with independent gearboxes',
+          'Tire Diameter: 65mm'
+        ]
+      },
+      {
+        id: 'power',
+        title: 'Power & Battery System',
+        icon: <Zap strokeWidth={1.5} />,
+        content: 'The robot is powered by two 18650 lithium-ion batteries. Always ensure proper polarity during assembly to prevent short circuits.',
+        details: [
+          'Battery Type: 2x 18650 Li-ion (Flat or Button Top)',
+          'Operating Voltage: 7.4V - 8.4V',
+          'Charging: Use the included dual-slot charger. Do NOT charge via Arduino USB.',
+          'Safety: The expansion shield includes reverse-polarity protection.'
+        ]
+      }
+    ]
   }
 ];
 
