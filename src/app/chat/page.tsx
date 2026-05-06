@@ -165,20 +165,42 @@ export default function ChatPage() {
   );
 
   return (
-    <div className="flex h-screen bg-[#0A0A0A] text-zinc-100 overflow-hidden font-sans">
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="fixed top-4 left-4 z-50 md:hidden p-2 glass rounded-lg"
-      >
-        {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
+    <div className="flex flex-col h-screen bg-[#0A0A0A] text-zinc-100 overflow-hidden font-sans">
+      {/* Header */}
+      <header className="h-14 border-b border-white/5 bg-[#1D1D1F]/80 backdrop-blur-2xl flex items-center justify-between px-4 shrink-0 z-50">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="p-1.5 text-zinc-400 hover:text-white rounded-md hover:bg-white/10 transition-colors md:hidden"
+          >
+            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+          
+          <Link href="/" className="group flex items-center gap-2 text-sm font-medium text-[#86868B] hover:text-[#F5F5F7] transition-colors">
+            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+            <span className="hidden sm:inline">Home</span>
+          </Link>
+          <div className="h-4 w-px bg-white/10 mx-2 hidden sm:block" />
+          <Link href="/docs" className="text-sm font-medium text-[#86868B] hover:text-white transition-colors hidden sm:block">Docs</Link>
+          <Link href="/chat" className="text-sm font-medium text-white transition-colors hidden sm:block">Chat</Link>
+          <Link href="/tester" className="text-sm font-medium text-[#86868B] hover:text-white transition-colors hidden sm:flex items-center gap-2">
+            <Activity size={14} className="text-red-500" />
+            Diagnostics
+          </Link>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">
+            {currentSession?.title || 'New Thread'}
+          </span>
+        </div>
+      </header>
 
+      <div className="flex flex-1 overflow-hidden relative">
       {/* Sidebar */}
       <motion.aside
         initial={false}
         animate={{ width: isSidebarOpen ? 300 : 0, opacity: isSidebarOpen ? 1 : 0 }}
-        className="border-r border-white/5 bg-[#0D0D0D] flex flex-col relative z-40 overflow-hidden"
+        className="border-r border-white/5 bg-[#0D0D0D] flex flex-col absolute md:relative z-50 h-full overflow-hidden shrink-0"
       >
         <div className="p-4 flex flex-col h-full w-[300px]">
           <div className="mb-8 px-1">
@@ -259,7 +281,8 @@ export default function ChatPage() {
       </motion.aside>
 
       {/* Main Chat Area */}
-      <main className="flex-1 flex flex-col relative min-w-0">
+      <main className="flex-1 flex flex-col relative min-w-0 h-full">
+
         <div
           ref={scrollRef}
           className="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 scroll-smooth"
@@ -422,6 +445,7 @@ export default function ChatPage() {
           </p>
         </div>
       </main>
+      </div>
     </div>
   );
 }
