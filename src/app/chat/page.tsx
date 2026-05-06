@@ -21,7 +21,8 @@ import {
   LogOut,
   Bot,
   Paperclip,
-  FileText
+  FileText,
+  ArrowLeft
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { CodeBlock } from '@/components/ui/CodeBlock';
