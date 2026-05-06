@@ -236,7 +236,13 @@ export default function ChatPage() {
               </button>
             ))}
           </div>
-          <div className="mt-auto pt-4 border-t border-white/5">
+          <div className="pt-4 border-t border-white/5 space-y-2">
+            <Link href="/tester">
+              <div className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 text-zinc-400 hover:text-white transition-all text-left group cursor-pointer mb-2">
+                <Activity size={16} className="text-red-500" />
+                <span className="text-xs font-medium">Hardware Diagnostics</span>
+              </div>
+            </Link>
             <button
               onClick={async () => {
                 const supabase = (await import('@/lib/supabase')).createClient();

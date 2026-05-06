@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Bot, Cpu, Gauge, Shield, Terminal, Zap, Smartphone, Layers, Navigation } from 'lucide-react';
+import { Bot, Cpu, Gauge, Shield, Terminal, Zap, Smartphone, Layers, Navigation, Activity } from 'lucide-react';
 
 export default function Hero() {
   return (
@@ -44,23 +44,33 @@ export default function Hero() {
               Code, debug, and build with unprecedented precision.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center gap-6">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
               <Link href="/chat">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="px-8 py-4 bg-[#F5F5F7] text-black hover:bg-white rounded-full font-medium transition-all shadow-[0_0_40px_rgba(255,255,255,0.1)] w-full sm:w-auto"
+                  className="px-6 py-3 bg-[#F5F5F7] text-black hover:bg-white rounded-full font-medium transition-all shadow-[0_0_40px_rgba(255,255,255,0.1)] w-full sm:w-auto text-sm"
                 >
                   Start Chatting
+                </motion.button>
+              </Link>
+              <Link href="/tester">
+                <motion.button
+                  whileHover={{ scale: 1.02, backgroundColor: "rgba(239,68,68,0.1)" }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-6 py-3 bg-red-500/10 border border-red-500/20 hover:border-red-500/40 text-red-400 rounded-full font-medium transition-all backdrop-blur-md w-full sm:w-auto text-sm flex items-center justify-center gap-2"
+                >
+                  <Activity size={16} />
+                  Diagnostics
                 </motion.button>
               </Link>
               <Link href="/docs">
                 <motion.button
                   whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.05)" }}
                   whileTap={{ scale: 0.98 }}
-                  className="px-8 py-4 bg-transparent border border-white/20 hover:border-white/40 text-[#F5F5F7] rounded-full font-medium transition-all backdrop-blur-md w-full sm:w-auto"
+                  className="px-6 py-3 bg-transparent border border-white/20 hover:border-white/40 text-[#F5F5F7] rounded-full font-medium transition-all backdrop-blur-md w-full sm:w-auto text-sm"
                 >
-                  Read Documentation
+                  Read Docs
                 </motion.button>
               </Link>
             </div>

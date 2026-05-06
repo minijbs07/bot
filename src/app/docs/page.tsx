@@ -231,12 +231,20 @@ export default function DocsPage() {
               className="w-full bg-[#2C2C2E]/50 border border-white/5 rounded-full py-1.5 pl-9 pr-4 text-xs focus:outline-none focus:bg-[#2C2C2E] focus:border-[#0071E3]/50 transition-all text-[#F5F5F7] placeholder:text-[#86868B]"
             />
           </div>
-          <Link href="/chat">
-            <button className="flex items-center gap-2 px-4 py-1.5 bg-[#F5F5F7] hover:bg-white text-black text-xs font-semibold rounded-full transition-all shadow-sm">
-              <Bot size={14} />
-              <span>Ask AI</span>
-            </button>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/tester">
+              <button className="flex items-center gap-2 px-4 py-1.5 bg-transparent border border-white/20 hover:border-white/40 text-white text-xs font-semibold rounded-full transition-all">
+                <Activity size={14} className="text-red-500" />
+                <span>Diagnostics</span>
+              </button>
+            </Link>
+            <Link href="/chat">
+              <button className="flex items-center gap-2 px-4 py-1.5 bg-[#F5F5F7] hover:bg-white text-black text-xs font-semibold rounded-full transition-all shadow-sm">
+                <Bot size={14} />
+                <span>Ask AI</span>
+              </button>
+            </Link>
+          </div>
         </div>
       </header>
 
