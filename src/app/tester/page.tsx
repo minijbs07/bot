@@ -16,7 +16,8 @@ import {
   AlertCircle,
   ChevronRight,
   Menu,
-  X
+  X,
+  RotateCw
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -79,6 +80,19 @@ const COMPONENTS: DiagnosticComponent[] = [
     ],
     instructions: 'Sensor array must be mounted 1-2cm above the ground. The onboard potentiometers can be turned to adjust sensitivity to black lines.',
     testCommand: 'TEST_IR'
+  },
+  {
+    id: 'servo',
+    name: 'SG90 Micro Servo',
+    icon: <RotateCw size={18} />,
+    blueprint: '/bot/blueprints/servo.png',
+    pins: [
+      { id: 'pwm', pin: 'PWM (Orange)', desc: 'Pin 10 (Z/Pan) / Pin 11 (Y/Tilt)', detail: 'Pulse Width Modulation signal used to dictate the angle of the servo horn.' },
+      { id: 'vcc', pin: 'VCC (Red)', desc: '5V Power', detail: 'Supplies logic and motor power to the servo. Powered by the external battery.' },
+      { id: 'gnd', pin: 'GND (Brown)', desc: 'Ground', detail: 'Completes the power circuit for the servo motor.' }
+    ],
+    instructions: 'Servos are used to pan and tilt the ultrasonic sensor. The diagnostic will sweep the servo from 0 to 180 degrees and back to center (90).',
+    testCommand: 'TEST_SERVO'
   }
 ];
 
