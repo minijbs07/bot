@@ -86,8 +86,8 @@ export default function Hero() {
               className="relative w-full h-full max-w-[600px] max-h-[600px] z-20"
             >
               <img 
-                src="/bot/hero-robot.png" 
-                alt="Botcasso AI Robot" 
+                src="/bot/elegoo-v4-hero.png" 
+                alt="Elegoo Smart Robot Car V4.0" 
                 className="object-contain w-full h-full drop-shadow-[0_20px_50px_rgba(0,113,227,0.3)]"
               />
             </motion.div>

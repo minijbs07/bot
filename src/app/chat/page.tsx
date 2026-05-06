@@ -20,7 +20,8 @@ import {
   X,
   LogOut,
   Bot,
-  Paperclip
+  Paperclip,
+  FileText
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { CodeBlock } from '@/components/ui/CodeBlock';
@@ -48,6 +49,7 @@ export default function ChatPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [attachedFiles, setAttachedFiles] = useState<{name: string, content: string}[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -87,16 +89,20 @@ export default function ChatPage() {
   }, [currentSession?.messages]);
 
   const handleSend = async (text: string = input) => {
-    if (!text.trim() || isGenerating || !currentSessionId || !user) return;
+    if ((!text.trim() && attachedFiles.length === 0) || isGenerating || !currentSessionId || !user) return;
+
+    const filesText = attachedFiles.map(f => `\n\nFile attached: ${f.name}\n\`\`\`${f.name.split('.').pop() || ''}\n${f.content}\n\`\`\`\n`).join('');
+    const finalText = text + filesText;
 
     const userMsg: Message = {
       role: 'user',
-      content: text,
+      content: finalText,
       timestamp: Date.now()
     };
 
     addMessage(currentSessionId, userMsg);
     setInput('');
+    setAttachedFiles([]);
     setIsGenerating(true);
 
     try {
@@ -143,7 +149,7 @@ export default function ChatPage() {
     reader.onload = (event) => {
       const content = event.target?.result;
       if (typeof content === 'string') {
-        setInput((prev) => prev + `\n\n\`\`\`${file.name.split('.').pop() || ''}\n${content}\n\`\`\`\n`);
+        setAttachedFiles(prev => [...prev, { name: file.name, content }]);
       }
     };
     reader.readAsText(file);
@@ -346,14 +352,35 @@ export default function ChatPage() {
         <div className="p-4 md:p-8 pt-0">
           <div className="max-w-4xl mx-auto relative group">
             <div className="absolute inset-0 bg-blue-600/10 blur-2xl rounded-3xl group-focus-within:bg-blue-600/20 transition-all opacity-0 group-focus-within:opacity-100" />
-            <div className="relative glass rounded-2xl border border-white/10 flex items-end p-2 transition-all focus-within:border-blue-500/50">
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleFileUpload} 
-                className="hidden" 
-                accept=".txt,.ino,.cpp,.c,.h,.swift,.js,.ts,.py,.json,.md"
-              />
+            
+            <div className="relative glass rounded-2xl border border-white/10 flex flex-col p-2 transition-all focus-within:border-blue-500/50">
+              
+              {/* Attached Files Visuals */}
+              {attachedFiles.length > 0 && (
+                <div className="flex flex-wrap gap-2 p-2 border-b border-white/5 mb-2">
+                  {attachedFiles.map((f, i) => (
+                    <div key={i} className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 text-blue-300 px-3 py-1.5 rounded-full text-xs font-medium">
+                      <FileText size={12} />
+                      <span className="truncate max-w-[150px]">{f.name}</span>
+                      <button 
+                        onClick={() => setAttachedFiles(prev => prev.filter((_, idx) => idx !== i))}
+                        className="hover:text-white transition-colors"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex items-end w-full">
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleFileUpload} 
+                  className="hidden" 
+                  accept=".txt,.ino,.cpp,.c,.h,.swift,.js,.ts,.py,.json,.md"
+                />
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="p-3 text-zinc-400 hover:text-white hover:bg-white/10 rounded-xl transition-all m-1 flex-shrink-0"
@@ -376,11 +403,12 @@ export default function ChatPage() {
               />
               <button
                 onClick={() => handleSend()}
-                disabled={!input.trim() || isGenerating}
+                disabled={(!input.trim() && attachedFiles.length === 0) || isGenerating}
                 className="p-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:bg-zinc-800 text-white rounded-xl transition-all m-1"
               >
                 <Send size={20} />
               </button>
+              </div>
             </div>
           </div>
           <p className="text-center text-[10px] text-zinc-600 mt-4 uppercase tracking-widest font-medium">

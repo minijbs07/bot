@@ -378,6 +378,31 @@ export default function DocsPage() {
             </table>
           </div>
         </motion.section>
+
+        {/* PDF Viewer Section */}
+        <motion.section
+          variants={itemVariants}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-100px" }}
+          className="mt-32 pt-20 border-t border-white/10 mb-32"
+        >
+          <div className="flex flex-col items-center mb-12 text-center">
+            <div className="w-12 h-12 rounded-full bg-[#2C2C2E] flex items-center justify-center text-[#F5F5F7] mb-6">
+              <Layers strokeWidth={1.5} size={20} />
+            </div>
+            <h2 className="text-3xl font-semibold tracking-tight">Official Manual Viewer</h2>
+            <p className="text-[#86868B] mt-3 font-light max-w-xl mx-auto">Access the complete Elegoo assembly and configuration manual directly within the platform.</p>
+          </div>
+          
+          <div className="w-full aspect-[4/3] md:aspect-[16/9] rounded-[32px] overflow-hidden bg-[#1D1D1F] border border-white/5 shadow-2xl relative">
+            <iframe 
+              src="/bot/pdfs/manual_es.pdf#toolbar=0&navpanes=0&scrollbar=0" 
+              className="w-full h-full border-none absolute inset-0"
+              title="Elegoo V4.0 Official Manual"
+            />
+          </div>
+        </motion.section>
       </main>
     </div>
   );
