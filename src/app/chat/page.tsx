@@ -22,7 +22,8 @@ import {
   Bot,
   Paperclip,
   FileText,
-  ArrowLeft
+  ArrowLeft,
+  Square
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { CodeBlock } from '@/components/ui/CodeBlock';
@@ -53,7 +54,25 @@ export default function ChatPage() {
   const [attachedFiles, setAttachedFiles] = useState<{name: string, content: string}[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const router = useRouter();
+
+  const cancelGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort('user_cancelled');
+      abortControllerRef.current = null;
+    }
+    setIsGenerating(false);
+  };
+
+  const handleCreateNewSession = () => {
+    if (isGenerating) cancelGeneration();
+    const id = createNewSession(user.id);
+    setCurrentSession(id);
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
+  };
 
   useEffect(() => {
     const checkUser = async () => {
@@ -106,22 +125,41 @@ export default function ChatPage() {
     setAttachedFiles([]);
     setIsGenerating(true);
 
+    abortControllerRef.current = new AbortController();
+    const timeoutId = setTimeout(() => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort('timeout');
+      }
+    }, 60000); // 60 seconds strict timeout
+
     try {
       const supabase = (await import('@/lib/supabase')).createClient();
-      const { data, error } = await supabase.functions.invoke('chat-proxy', {
-        body: {
-          messages: currentSession?.messages.concat(userMsg).map(m => ({ role: m.role, content: m.content }))
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) throw new Error("No active session");
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/chat-proxy`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
         },
+        body: JSON.stringify({
+          messages: currentSession?.messages.concat(userMsg).map(m => ({ role: m.role, content: m.content }))
+        }),
+        signal: abortControllerRef.current.signal
       });
 
-      if (error) throw error;
+      clearTimeout(timeoutId);
 
-      // Since Edge Functions handle streaming differently in invoke, 
-      // we'll either need to handle a non-streaming response or 
-      // use a direct fetch to the edge function URL if streaming is required.
-      // For simplicity in static export, we'll use the invoke data.
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || `Server error: ${response.status}`);
+      }
 
+      const data = await response.json();
       const assistantContent = data.choices[0]?.message?.content || '';
+      
       const assistantMsg: Message = {
         role: 'assistant',
         content: assistantContent,
@@ -130,15 +168,30 @@ export default function ChatPage() {
 
       addMessage(currentSessionId, assistantMsg);
 
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      console.error("Chat generation error:", error);
 
-      // Update session title if it's the first message (even on error, we might have the user message)
+      if (error.name === 'AbortError' || error === 'timeout') {
+        addMessage(currentSessionId, {
+          role: 'assistant',
+          content: '⚠️ **Generation Timeout / Aborted:** The connection took too long to respond or was stopped. OpenRouter providers may be experiencing high load. Please try again.',
+          timestamp: Date.now()
+        });
+      } else {
+        addMessage(currentSessionId, {
+          role: 'assistant',
+          content: `⚠️ **System Error:** ${error.message || 'Unknown error occurred'}`,
+          timestamp: Date.now()
+        });
+      }
+
       if (currentSession?.messages.length === 0) {
         updateSessionTitle(currentSessionId, text.slice(0, 30) + (text.length > 30 ? '...' : ''));
       }
     } finally {
+      clearTimeout(timeoutId);
       setIsGenerating(false);
+      abortControllerRef.current = null;
     }
   };
 
@@ -216,7 +269,7 @@ export default function ChatPage() {
           </div>
 
           <button
-            onClick={() => createNewSession(user.id)}
+            onClick={handleCreateNewSession}
             className="flex items-center gap-2 w-full p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all text-sm font-medium mb-6 group"
           >
             <Plus size={16} className="text-blue-400 group-hover:rotate-90 transition-transform duration-300" />
@@ -431,13 +484,24 @@ export default function ChatPage() {
                 className="flex-1 bg-transparent border-none focus:ring-0 text-white placeholder-zinc-500 p-3 resize-none min-h-[56px] max-h-[200px]"
                 rows={1}
               />
-              <button
-                onClick={() => handleSend()}
-                disabled={(!input.trim() && attachedFiles.length === 0) || isGenerating}
-                className="p-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:bg-zinc-800 text-white rounded-xl transition-all m-1"
-              >
-                <Send size={20} />
-              </button>
+              {isGenerating ? (
+                <button
+                  onClick={cancelGeneration}
+                  className="p-3 bg-red-600 hover:bg-red-500 text-white rounded-xl transition-all m-1 shadow-[0_0_15px_rgba(220,38,38,0.3)] animate-pulse"
+                  title="Stop generation"
+                >
+                  <Square size={20} fill="currentColor" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleSend()}
+                  disabled={(!input.trim() && attachedFiles.length === 0)}
+                  className="p-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:bg-zinc-800 text-white rounded-xl transition-all m-1"
+                  title="Send message"
+                >
+                  <Send size={20} />
+                </button>
+              )}
               </div>
             </div>
           </div>
