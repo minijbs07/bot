@@ -81,7 +81,7 @@ export default function LoginPage() {
               exit={{ opacity: 0, x: isSignUp ? -20 : 20 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              <div className="flex flex-col items-center mb-8">
+                <div className="flex flex-col items-center mb-8">
                 <motion.div
                   initial={{ scale: 0.8 }}
                   animate={{ scale: 1 }}
@@ -92,11 +92,26 @@ export default function LoginPage() {
                 <h1 className="text-3xl font-bold tracking-tight mb-2">
                   {isSignUp ? 'Crear Cuenta' : 'Acceso Seguro'}
                 </h1>
-                <p className="text-zinc-500 text-center text-sm">
+                <p className="text-zinc-500 text-center text-sm mb-6">
                   {isSignUp
                     ? 'Regístrate con tu correo de la UC para empezar.'
                     : 'Identifícate para acceder al Botcasso Toolbox.'}
                 </p>
+
+                <div className="flex w-full bg-[#111111] border border-white/10 rounded-2xl p-1 mb-2">
+                  <button
+                    onClick={() => { setIsSignUp(false); setError(null); setMessage(null); }}
+                    className={`flex-1 py-2.5 text-xs font-semibold uppercase tracking-widest rounded-xl transition-all ${!isSignUp ? 'bg-white/10 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}
+                  >
+                    Iniciar Sesión
+                  </button>
+                  <button
+                    onClick={() => { setIsSignUp(true); setError(null); setMessage(null); }}
+                    className={`flex-1 py-2.5 text-xs font-semibold uppercase tracking-widest rounded-xl transition-all ${isSignUp ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}
+                  >
+                    Crear Cuenta
+                  </button>
+                </div>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
@@ -169,17 +184,6 @@ export default function LoginPage() {
           </AnimatePresence>
 
           <div className="mt-8 pt-6 border-t border-white/5 flex flex-col items-center gap-4">
-            <button
-              onClick={() => {
-                setIsSignUp(!isSignUp);
-                setError(null);
-                setMessage(null);
-              }}
-              className="text-sm text-zinc-400 hover:text-white transition-colors flex items-center gap-2 group"
-            >
-              {isSignUp ? '¿Ya tienes cuenta? Entra aquí' : '¿No tienes cuenta? Crea una'}
-              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-            </button>
 
             <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em]">
               <Terminal size={14} />

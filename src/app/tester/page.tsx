@@ -167,11 +167,46 @@ export default function TesterPage() {
       await writer.write(data);
       writer.releaseLock();
       
-      addLog("Command sent. Awaiting response...");
+      addLog("Command sent. Awaiting real response...");
       
-      setTimeout(() => {
-        addLog(`Test [${activeComponent.name}] completed successfully.`);
-      }, 1500);
+      const reader = port.readable.getReader();
+      const decoder = new TextDecoder();
+      
+      try {
+        const readPromise = (async () => {
+          let responseText = '';
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            responseText += decoder.decode(value);
+            if (responseText.includes('\\n')) {
+              return responseText.trim();
+            }
+          }
+          return responseText;
+        })();
+        
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000));
+        
+        const result = await Promise.race([readPromise, timeoutPromise]);
+        
+        if (typeof result === 'string') {
+          addLog(`Arduino: ${result}`);
+          if (result.includes('OK') || result.includes('SUCCESS') || result.includes('1')) {
+            addLog(`Test [${activeComponent.name}] passed!`);
+          } else {
+            addLog(`Test [${activeComponent.name}] status: ${result}`);
+          }
+        }
+      } catch (err: any) {
+        if (err.message === 'timeout') {
+          addLog(`Test [${activeComponent.name}] timed out. Is diagnostic firmware loaded?`);
+        } else {
+          throw err;
+        }
+      } finally {
+        reader.releaseLock();
+      }
 
     } catch (err: any) {
       addLog(`Error during test: ${err.message}`);
@@ -314,38 +349,64 @@ export default function TesterPage() {
             {/* Interactive Pinout & Terminal */}
             <div className="w-full lg:w-80 shrink-0 border-t lg:border-t-0 lg:border-l border-white/5 bg-[#111111] flex flex-col h-auto lg:h-full">
               <div className="p-4 sm:p-6 border-b border-white/5 flex-shrink-0">
-                <h3 className="text-xs font-bold text-red-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                  <Cpu size={14} /> Interactive Pinout
-                </h3>
-                <div className="space-y-2">
-                  {activeComponent.pins.map((pinObj, i) => (
-                    <div key={i} className="flex flex-col">
-                      <button 
-                        onClick={() => setActivePinIndex(activePinIndex === i ? null : i)}
-                        className={`flex justify-between items-center text-sm p-2 rounded-lg transition-colors ${activePinIndex === i ? 'bg-red-500/10 border border-red-500/20' : 'hover:bg-white/5 border border-transparent'}`}
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-[10px] font-bold text-red-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                    <Cpu size={14} /> Assembly Steps
+                  </h3>
+                  <span className="bg-white/10 text-white font-bold px-2 py-1 rounded text-[10px]">
+                    {activePinIndex !== null ? `STEP ${activePinIndex + 1} OF ${activeComponent.pins.length}` : 'GUIDE'}
+                  </span>
+                </div>
+
+                <div className="relative overflow-hidden min-h-[160px] flex items-center">
+                  <AnimatePresence mode="wait">
+                    {activePinIndex !== null && (
+                      <motion.div
+                        key={activePinIndex}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.3 }}
+                        className="w-full"
                       >
-                        <span className="text-[#86868B] font-mono font-medium">{pinObj.pin}</span>
-                        <div className="flex items-center gap-2">
-                          <span className={`font-medium ${activePinIndex === i ? 'text-red-400' : 'text-zinc-400'}`}>{pinObj.desc}</span>
-                          <ChevronRight size={14} className={`text-zinc-600 transition-transform ${activePinIndex === i ? 'rotate-90 text-red-400' : ''}`} />
+                        <div className="bg-[#1A1A1A] p-4 rounded-xl border border-white/10 shadow-lg">
+                          <h4 className="text-lg font-bold text-white mb-1">{activeComponent.pins[activePinIndex].pin}</h4>
+                          <div className="text-red-400 font-mono text-xs mb-3">Connect to: {activeComponent.pins[activePinIndex].desc}</div>
+                          <p className="text-zinc-400 text-xs leading-relaxed">
+                            {activeComponent.pins[activePinIndex].detail}
+                          </p>
                         </div>
-                      </button>
-                      <AnimatePresence>
-                        {activePinIndex === i && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden"
-                          >
-                            <p className="p-3 text-xs text-zinc-400 leading-relaxed bg-[#1A1A1A] rounded-lg mt-1 border border-white/5">
-                              {pinObj.detail}
-                            </p>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  ))}
+                      </motion.div>
+                    )}
+                    {activePinIndex === null && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="w-full text-center text-zinc-500 text-sm flex flex-col items-center gap-3"
+                      >
+                        <Cpu size={24} className="opacity-20" />
+                        <span>Click 'Start Assembly' to view step-by-step LEGO style instructions.</span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                
+                <div className="flex justify-between mt-4">
+                  <button 
+                    onClick={() => setActivePinIndex(prev => prev !== null && prev > 0 ? prev - 1 : null)}
+                    disabled={activePinIndex === null}
+                    className="px-3 py-1.5 bg-white/5 rounded-lg disabled:opacity-30 hover:bg-white/10 transition-colors text-xs font-medium"
+                  >
+                    Back
+                  </button>
+                  <button 
+                    onClick={() => setActivePinIndex(prev => prev === null ? 0 : Math.min(prev + 1, activeComponent.pins.length - 1))}
+                    disabled={activePinIndex === activeComponent.pins.length - 1}
+                    className="px-3 py-1.5 bg-blue-600 rounded-lg disabled:opacity-30 hover:bg-blue-500 transition-colors text-white text-xs font-medium shadow-[0_0_15px_rgba(37,99,235,0.3)]"
+                  >
+                    {activePinIndex === null ? 'Start Assembly' : 'Next Step'}
+                  </button>
                 </div>
               </div>
 

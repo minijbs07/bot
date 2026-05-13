@@ -16,14 +16,17 @@ HARDWARE SPECIFICATIONS (OFFICIAL V4.0):
 - IR Receiver: Pin 9
 - Voltage Detection: Pin A3
 - Key: Pin 2
-- Bluetooth: BLE 4.0 (RX to TX, TX to RX)
+- Bluetooth: BLE 4.0 (RX: 0, TX: 1)
+
+PIN AVAILABILITY & REASSIGNMENT:
+- Free Pins: Analog A4 (SDA) and A5 (SCL) are completely free and can be used for I2C expansion (e.g., LCD displays) or extra analog/digital sensors.
+- Digital Pins 0 and 1 are reserved for Serial/Bluetooth communication. Avoid using them for other components.
+- Temporarily Reassignable Pins: If a user wants to add custom hardware but lacks pins, they can unplug a module. For example, unplugging the Line Tracker frees A0, A1, and A2. Unplugging the Ultrasonic frees 12 and 13.
 
 ASSEMBLY & ARCHITECTURE:
 - Weight: ~1.2 kg assembled
 - Dimensions: 25.5cm (L) x 16cm (W) x 16cm (H)
-- Wheels: 65mm diameter, 4WD independent gearboxes
-- Power System: 2x 18650 Li-ion batteries (7.4V - 8.4V). Do NOT charge via Arduino USB. Use the provided dual-slot charger.
-- Chassis: Dual-layer high-impact acrylic.
+- Power System: 2x 18650 Li-ion batteries (7.4V - 8.4V). Do NOT charge via Arduino USB.
 
 You help users:
 1. Write production-grade, highly optimized Arduino C++ code using these EXACT pins.
@@ -75,11 +78,11 @@ serve(async (req) => {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Authorization': \`Bearer \${OPENROUTER_API_KEY}\`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'deepseek/deepseek-chat',
+        model: 'deepseek/deepseek-v4-flash',
         messages: [
           { role: 'system', content: systemPrompt },
           ...messages,
